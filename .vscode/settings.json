@@ -1,0 +1,12 @@
+{
+    "C_Cpp.clang_format_style": "file",
+    "editor.formatOnSave": true,
+    "[cpp]": {
+        "editor.quickSuggestions": true
+    },
+    "[c]": {
+        "editor.quickSuggestions": true
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "idf.portWin": "COM4"
+}

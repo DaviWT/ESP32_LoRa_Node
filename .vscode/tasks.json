@@ -1,0 +1,191 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build - Build project",
+            "type": "shell",
+            "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py build",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py build"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            }
+        },
+        {
+            "label": "Set ESP-IDF Target",
+            "type": "shell",
+            "command": "${command:espIdf.setTarget}",
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(//d+):(//d+)://s+(warning|error)://s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            },
+        },
+        {
+            "label": "Clean - Clean the project",
+            "type": "shell",
+            "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py fullclean",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py fullclean"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            },
+        },
+        {
+            "label": "Half Flash - Flash the device",
+            "type": "shell",
+            "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPath}/components/esptool_py/esptool/esptool.py --chip esp32 -p ${config:idf.port} -b ${config:idf.baudRate} --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0xd000 build/ota_data_initial.bin 0x1000 build/bootloader/bootloader.bin 0x90000 build/esp32_connectag_hw9a.bin 0x8000 build/partition_table/partition-table.bin",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\components\\esptool_py\\esptool\\esptool.py --chip esp32 -p ${config:idf.portWin} -b ${config:idf.baudRate} --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0xd000 build/ota_data_initial.bin 0x1000 build/bootloader/bootloader.bin 0x90000 build/esp32_connectag_hw9a.bin 0x8000 build/partition_table/partition-table.bin"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Full Flash - Flash the device",
+            "type": "shell",
+            "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPath}/components/esptool_py/esptool/esptool.py --chip esp32 -p ${config:idf.port} -b ${config:idf.baudRate} --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0xd000 build/ota_data_initial.bin 0x1000 build/bootloader/bootloader.bin 0x10000 build/updater.bin 0x90000 build/esp32_connectag_hw9a.bin 0x8000 build/partition_table/partition-table.bin",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\components\\esptool_py\\esptool\\esptool.py --chip esp32 -p ${config:idf.portWin} -b ${config:idf.baudRate} --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0xd000 build/ota_data_initial.bin 0x1000 build/bootloader/bootloader.bin 0x10000 build/updater.bin 0x90000 build/esp32_connectag_hw9a.bin 0x8000 build/partition_table/partition-table.bin"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            }
+        },
+        {
+            "label": "Erase Flash - Erase the device",
+            "type": "shell",
+            "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\components\\esptool_py\\esptool\\esptool.py --chip esp32 -p ${config:idf.portWin} -b ${config:idf.baudRate} erase_flash",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\components\\esptool_py\\esptool\\esptool.py --chip esp32 -p ${config:idf.portWin} -b ${config:idf.baudRate} erase_flash"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            }
+        },
+        {
+            "label": "Monitor: Start the monitor",
+            "type": "shell",
+            "dependsOn": "Flash - Flash the device",
+            "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py -p ${config:idf.port} -b ${config:idf.baudRate} monitor",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py monitor -p ${config:idf.portWin} -b ${config:idf.baudRate}"
+            }
+        },
+        {
+            "label":"OpenOCD: Start openOCD",
+            "type":"shell",
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "focus": false,
+                "panel":"new"
+            },
+            "command":"openocd -s ${command:espIdf.getOpenOcdScriptValue} ${command:espIdf.getOpenOcdConfigs}",
+            "windows": {
+                "command": "openocd.exe -s ${command:espIdf.getOpenOcdScriptValue} ${command:espIdf.getOpenOcdConfigs}"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            },
+        },
+        {
+            "label": "Config: Reconfigure",
+            "type": "shell",
+            "command": "${config:idf.pythonBinPath} ${config:idf.espIdfPath}/tools/idf.py reconfigure",
+            "windows": {
+                "command": "${config:idf.pythonBinPathWin} ${config:idf.espIdfPathWin}\\tools\\idf.py reconfigure"
+            }
+        },
+        {
+            "label": "StackTrace: Decode dump",
+            "type": "shell",
+            "command": "java -jar ${workspaceFolder}/EspStackTraceDecoder.jar ${env:USERPROFILE}/.espressif/tools/xtensa-esp32-elf/esp-2019r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-addr2line ${workspaceFolder}/build/esp32_connectag_hw9a.elf ${workspaceFolder}/dump.txt",
+            "windows": {
+                "command": "java -jar ${workspaceFolder}\\EspStackTraceDecoder.jar ${env:USERPROFILE}\\.espressif\\tools\\xtensa-esp32-elf\\esp-2019r2-8.2.0\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-addr2line ${workspaceFolder}\\build\\esp32_connectag_hw9a.elf ${workspaceFolder}\\dump.txt"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                } 
+            },
+        },
+    ]
+}

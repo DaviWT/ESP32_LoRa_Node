@@ -8,5 +8,8 @@
         "editor.quickSuggestions": true
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
-    "idf.portWin": "COM4"
+    "idf.portWin": "COM4",
+    "files.associations": {
+        "gpio.h": "c"
+    }
 }

@@ -113,12 +113,20 @@ void messageReceived(const uint8_t *message, size_t length, port_t port)
         ESP_LOGI(TAG, " %02x", message[i]);
 }
 
+static void GPIO_Init()
+{
+    gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
+}
+
 extern "C" void app_main(void)
 {
     esp_err_t err;
 
     // Set debug log level
     esp_log_level_set("*", ESP_LOG_INFO);  //TODO: check why is not working
+
+    // Init GPIO
+    GPIO_Init();  // @TODO Continuar fazendo isso
 
     // Initialize the GPIO ISR handler service
     err = gpio_install_isr_service(ESP_INTR_FLAG_IRAM);

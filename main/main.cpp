@@ -10,12 +10,11 @@
  * Sample program showing how to send and receive messages.
  *******************************************************************************/
 
-#include "freertos/FreeRTOS.h"
-#include "esp_event.h"
-#include "driver/gpio.h"
-#include "nvs_flash.h"
-
 #include "TheThingsNetwork.h"
+#include "driver/gpio.h"
+#include "esp_event.h"
+#include "freertos/FreeRTOS.h"
+#include "nvs_flash.h"
 
 // NOTE:
 // The LoRaWAN frequency and the radio chip must be configured by running 'make menuconfig'.
@@ -30,16 +29,16 @@ const char *appEui = "????????????????";
 const char *appKey = "????????????????????????????????";
 
 // Pins and other resources
-#define TTN_SPI_HOST HSPI_HOST
+#define TTN_SPI_HOST     HSPI_HOST
 #define TTN_SPI_DMA_CHAN 1
 #define TTN_PIN_SPI_SCLK 5
 #define TTN_PIN_SPI_MOSI 27
 #define TTN_PIN_SPI_MISO 19
-#define TTN_PIN_NSS 18
-#define TTN_PIN_RXTX TTN_NOT_CONNECTED
-#define TTN_PIN_RST 14
-#define TTN_PIN_DIO0 26
-#define TTN_PIN_DIO1 35
+#define TTN_PIN_NSS      18
+#define TTN_PIN_RXTX     TTN_NOT_CONNECTED
+#define TTN_PIN_RST      14
+#define TTN_PIN_DIO0     26
+#define TTN_PIN_DIO1     35
 
 static TheThingsNetwork ttn;
 
@@ -49,7 +48,7 @@ static uint8_t msgData[] = "Hello World!";
 bool join()
 {
     printf("Joining...\n");
-    if (ttn.join())
+    if(ttn.join())
     {
         printf("Joined.\n");
         return true;
@@ -63,11 +62,10 @@ bool join()
 
 void sendMessages(void *pvParameter)
 {
-    while (1)
+    while(1)
     {
-
         // Send 2 messages
-        for (int i = 0; i < 2; i++)
+        for(int i = 0; i < 2; i++)
         {
             printf("Sending message...\n");
             TTNResponseCode res = ttn.transmitMessage(msgData, sizeof(msgData) - 1);
@@ -87,7 +85,7 @@ void sendMessages(void *pvParameter)
         ttn.startup();
 
         // join again
-        if (!join())
+        if(!join())
             return;
     }
 }
@@ -95,7 +93,7 @@ void sendMessages(void *pvParameter)
 void messageReceived(const uint8_t *message, size_t length, port_t port)
 {
     printf("Message of %d bytes received on port %d:", length, port);
-    for (int i = 0; i < length; i++)
+    for(int i = 0; i < length; i++)
         printf(" %02x", message[i]);
     printf("\n");
 }
@@ -130,7 +128,7 @@ extern "C" void app_main(void)
 
     ttn.onMessage(messageReceived);
 
-    if (join())
+    if(join())
     {
         xTaskCreate(sendMessages, "send_messages", 1024 * 4, (void *)0, 3, nullptr);
     }

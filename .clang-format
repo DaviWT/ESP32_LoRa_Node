@@ -1,0 +1,8 @@
+BasedOnStyle: Google
+ColumnLimit: 0
+IndentWidth: 4
+AlignConsecutiveMacros: true
+BreakBeforeBraces: Allman
+SpaceBeforeParens: Never
+SpaceBeforeRangeBasedForLoopColon: false
+ContinuationIndentWidth: 4

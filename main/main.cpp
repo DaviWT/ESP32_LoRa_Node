@@ -30,21 +30,21 @@ const char *appEui = "????????????????";
 const char *appKey = "????????????????????????????????";
 
 // Pins and other resources
-#define TTN_SPI_HOST      HSPI_HOST
-#define TTN_SPI_DMA_CHAN  1
-#define TTN_PIN_SPI_SCLK  5
-#define TTN_PIN_SPI_MOSI  27
-#define TTN_PIN_SPI_MISO  19
-#define TTN_PIN_NSS       18
-#define TTN_PIN_RXTX      TTN_NOT_CONNECTED
-#define TTN_PIN_RST       14
-#define TTN_PIN_DIO0      26
-#define TTN_PIN_DIO1      35
+#define TTN_SPI_HOST HSPI_HOST
+#define TTN_SPI_DMA_CHAN 1
+#define TTN_PIN_SPI_SCLK 5
+#define TTN_PIN_SPI_MOSI 27
+#define TTN_PIN_SPI_MISO 19
+#define TTN_PIN_NSS 18
+#define TTN_PIN_RXTX TTN_NOT_CONNECTED
+#define TTN_PIN_RST 14
+#define TTN_PIN_DIO0 26
+#define TTN_PIN_DIO1 35
 
 static TheThingsNetwork ttn;
 
 const unsigned TX_INTERVAL = 30;
-static uint8_t msgData[] = "Hello, world";
+static uint8_t msgData[] = "Hello World!";
 
 bool join()
 {
@@ -61,10 +61,10 @@ bool join()
     }
 }
 
-
-void sendMessages(void* pvParameter)
+void sendMessages(void *pvParameter)
 {
-    while (1) {
+    while (1)
+    {
 
         // Send 2 messages
         for (int i = 0; i < 2; i++)
@@ -92,7 +92,7 @@ void sendMessages(void* pvParameter)
     }
 }
 
-void messageReceived(const uint8_t* message, size_t length, port_t port)
+void messageReceived(const uint8_t *message, size_t length, port_t port)
 {
     printf("Message of %d bytes received on port %d:", length, port);
     for (int i = 0; i < length; i++)
@@ -106,7 +106,7 @@ extern "C" void app_main(void)
     // Initialize the GPIO ISR handler service
     err = gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
     ESP_ERROR_CHECK(err);
-    
+
     // Initialize the NVS (non-volatile storage) for saving and restoring the keys
     err = nvs_flash_init();
     ESP_ERROR_CHECK(err);
@@ -132,6 +132,6 @@ extern "C" void app_main(void)
 
     if (join())
     {
-        xTaskCreate(sendMessages, "send_messages", 1024 * 4, (void* )0, 3, nullptr);
+        xTaskCreate(sendMessages, "send_messages", 1024 * 4, (void *)0, 3, nullptr);
     }
 }

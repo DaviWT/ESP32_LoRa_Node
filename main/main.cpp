@@ -8,13 +8,25 @@
  * https://opensource.org/licenses/MIT
  *
  * Sample program showing how to send and receive messages.
+ *******************************************************************************
+ *******************************************************************************
+ * Adapted by: 
+ * - Adriano Gamba
+ * - Davi Tokikawa
+ * - Erika Both
  *******************************************************************************/
+
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include "TheThingsNetwork.h"
 #include "driver/gpio.h"
 #include "esp_event.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "nvs_flash.h"
+
+// Tag to indicate at debug log
+static const char *TAG = "MAIN";
 
 // NOTE:
 // The LoRaWAN frequency and the radio chip must be configured by running 'make menuconfig'.
@@ -47,15 +59,15 @@ static uint8_t msgData[] = "Hello World!";
 
 bool join()
 {
-    printf("Joining...\n");
+    ESP_LOGI(TAG, "Joining...");
     if(ttn.join())
     {
-        printf("Joined.\n");
+        ESP_LOGI(TAG, "Joined.");
         return true;
     }
     else
     {
-        printf("Join failed. Goodbye\n");
+        ESP_LOGI(TAG, "Join failed. Goodbye");
         return false;
     }
 }
@@ -67,9 +79,12 @@ void sendMessages(void *pvParameter)
         // Send 2 messages
         for(int i = 0; i < 2; i++)
         {
-            printf("Sending message...\n");
+            ESP_LOGI(TAG, "Sending message...");
             TTNResponseCode res = ttn.transmitMessage(msgData, sizeof(msgData) - 1);
-            printf(res == kTTNSuccessfulTransmission ? "Message sent.\n" : "Transmission failed.\n");
+            if(res == kTTNSuccessfulTransmission)
+                ESP_LOGI(TAG, "Message sent.");
+            else
+                ESP_LOGI(TAG, "Transmission failed.");
 
             vTaskDelay(TX_INTERVAL * pdMS_TO_TICKS(1000));
         }
@@ -78,7 +93,7 @@ void sendMessages(void *pvParameter)
         ttn.shutdown();
 
         // go to sleep
-        printf("Sleeping for 30s...\n");
+        ESP_LOGI(TAG, "Sleeping for 30s...");
         vTaskDelay(pdMS_TO_TICKS(30000));
 
         // startup
@@ -92,15 +107,19 @@ void sendMessages(void *pvParameter)
 
 void messageReceived(const uint8_t *message, size_t length, port_t port)
 {
-    printf("Message of %d bytes received on port %d:", length, port);
+    //TODO: refactor debug log logic to use ESP_LOGI
+    ESP_LOGI(TAG, "Message of %d bytes received on port %d:", length, port);
     for(int i = 0; i < length; i++)
-        printf(" %02x", message[i]);
-    printf("\n");
+        ESP_LOGI(TAG, " %02x", message[i]);
 }
 
 extern "C" void app_main(void)
 {
     esp_err_t err;
+
+    // Set debug log level
+    esp_log_level_set("*", ESP_LOG_INFO);  //TODO: check why is not working
+
     // Initialize the GPIO ISR handler service
     err = gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
     ESP_ERROR_CHECK(err);

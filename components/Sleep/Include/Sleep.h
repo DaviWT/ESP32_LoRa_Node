@@ -3,7 +3,8 @@
 
 #include "stdint.h"
 
-#define NO_TIMER_WAKEUP 0
+#define NO_TIMER_WAKEUP   0
+#define WAKE_ON_LOW_LEVEL 0
 
 void Sleep_EnterSleepMode(uint64_t microsecondsToWakeUp);
 

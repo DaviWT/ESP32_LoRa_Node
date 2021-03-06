@@ -51,13 +51,10 @@ static void SetPinsToHold()
  */
 static void SetWakeUpConfig(uint64_t microsecondsToWakeUp)
 {
-    // Set wake up pin
-    gpio_wakeup_enable(GPIO_NUM_0, GPIO_INTR_LOW_LEVEL);  // @TODO Definir pino definitivo para wake up
-
-    // Enable sleep GPIO wakeup
-    esp_sleep_enable_gpio_wakeup();
+    // Set wake up pin and enable sleep GPIO wakeup (ext0)
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, WAKE_ON_LOW_LEVEL);  // @TODO Definir pino definitivo para wake up
 
     // Set wake up by timer
-    if(microsecondsToWakeUp == NO_TIMER_WAKEUP)
+    if(microsecondsToWakeUp != NO_TIMER_WAKEUP)
         esp_sleep_enable_timer_wakeup(microsecondsToWakeUp);
 }

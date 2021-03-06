@@ -18,6 +18,7 @@
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
+#include "Sleep.h"
 #include "TheThingsNetwork.h"
 #include "driver/gpio.h"
 #include "esp_event.h"
@@ -116,27 +117,13 @@ void messageReceived(const uint8_t *message, size_t length, port_t port)
 static void GPIO_Init()
 {
     gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
-}
-
-extern "C" void app_main(void)
-{
-    esp_err_t err;
-
-    // Set debug log level
-    esp_log_level_set("*", ESP_LOG_INFO);  //TODO: check why is not working
-
-    // Init GPIO
-    GPIO_Init();  // @TODO Continuar fazendo isso
 
     // Initialize the GPIO ISR handler service
-    err = gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
-    ESP_ERROR_CHECK(err);
+    ESP_ERROR_CHECK(gpio_install_isr_service(ESP_INTR_FLAG_IRAM));
+}
 
-    // Initialize the NVS (non-volatile storage) for saving and restoring the keys
-    err = nvs_flash_init();
-    ESP_ERROR_CHECK(err);
-
-    // Initialize SPI bus
+static void SPI_init()
+{
     spi_bus_config_t spi_bus_config;
     spi_bus_config.miso_io_num = TTN_PIN_SPI_MISO;
     spi_bus_config.mosi_io_num = TTN_PIN_SPI_MOSI;
@@ -144,8 +131,33 @@ extern "C" void app_main(void)
     spi_bus_config.quadwp_io_num = -1;
     spi_bus_config.quadhd_io_num = -1;
     spi_bus_config.max_transfer_sz = 0;
-    err = spi_bus_initialize(TTN_SPI_HOST, &spi_bus_config, TTN_SPI_DMA_CHAN);
-    ESP_ERROR_CHECK(err);
+
+    ESP_ERROR_CHECK(spi_bus_initialize(TTN_SPI_HOST, &spi_bus_config, TTN_SPI_DMA_CHAN));
+}
+
+extern "C" void app_main(void)
+{
+    // Set default debug output
+    esp_log_set_vprintf(vprintf);
+
+    // Set debug log level
+    esp_log_level_set("*", ESP_LOG_INFO);
+
+    // Inital log to indicate execution start
+    ESP_LOGI(TAG, "FW START!");
+    vTaskDelay(pdMS_TO_TICKS(500));
+
+    // Set debug log level
+    esp_log_level_set("*", ESP_LOG_INFO);
+
+    // Init GPIO
+    GPIO_Init();  // @TODO Continuar implementando conforme o desenvolvimento
+
+    // Initialize the NVS (non-volatile storage) for saving and restoring the keys
+    ESP_ERROR_CHECK(nvs_flash_init());
+
+    // Initialize SPI bus
+    SPI_init();
 
     // Configure the SX127x pins
     ttn.configurePins(TTN_SPI_HOST, TTN_PIN_NSS, TTN_PIN_RXTX, TTN_PIN_RST, TTN_PIN_DIO0, TTN_PIN_DIO1);

@@ -1,2 +1,2 @@
-idf_component_register( SRCS Sleep.c
+idf_component_register( SRCS Sleep.cpp
                         INCLUDE_DIRS include )

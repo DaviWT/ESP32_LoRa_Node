@@ -59,7 +59,7 @@ const char *appKey = "C0A9C01E65BB1B3FAB14360971CCBD3C";
 
 static esp_adc_cal_characteristics_t *adc_chars;
 static const adc1_channel_t channel = ADC1_CHANNEL_6;  //GPIO34 if ADC1, GPIO14 if ADC2
-static const adc_atten_t atten = ADC_ATTEN_DB_0;
+static const adc_atten_t atten = ADC_ATTEN_DB_11;
 static const adc_unit_t unit = ADC_UNIT_1;
 
 static TheThingsNetwork ttn;

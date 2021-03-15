@@ -43,7 +43,7 @@ bool LoRa_NodeInit()
 
 bool LoRa_ModemPinoutInit()
 {
-    if(LoRa_ModuleSpiBusInit())
+    if(!LoRa_ModuleSpiBusInit())
     {
         ESP_LOGE(TAG, "Unable to init and config SPI bus for LoRa module");
         return false;
@@ -87,9 +87,15 @@ static bool LoRa_ModuleSpiBusInit()
     spi_bus_config.quadwp_io_num = -1;
     spi_bus_config.quadhd_io_num = -1;
     spi_bus_config.max_transfer_sz = 0;
+    spi_bus_config.flags = 0;
+    spi_bus_config.intr_flags = 0;
 
-    if(spi_bus_initialize(TTN_SPI_HOST, &spi_bus_config, TTN_SPI_DMA_CHAN) != ESP_OK)
+    esp_err_t err = spi_bus_initialize(TTN_SPI_HOST, &spi_bus_config, TTN_SPI_DMA_CHAN);
+    if(err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to init SPI bus = %s", esp_err_to_name(err));
         return false;
+    }
 
     return true;
 }

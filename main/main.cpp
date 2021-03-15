@@ -70,7 +70,7 @@ extern "C" void app_main(void)
         esp_restart();
     }
 
-    if(xTaskCreate(taskLoRaTX, "LoRa_TX", 4096, NULL, 5, &xtaskLoRaTX) != pdTRUE)
+    if(xTaskCreate(&taskLoRaTX, "LoRa_TX", 4096, NULL, 5, &xtaskLoRaTX) != pdTRUE)
     {
         ESP_LOGE(TAG, "Failed to init LoRa_TX task!");
     }

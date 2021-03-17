@@ -11,7 +11,7 @@ static const char *TAG = "ADC";
 #define NO_OF_SAMPLES 64    //Multisampling
 
 static esp_adc_cal_characteristics_t *adc_chars;
-static const adc1_channel_t channel = ADC1_CHANNEL_6;  //GPIO34 if ADC1, GPIO14 if ADC2
+static const adc1_channel_t channel = ADC1_CHANNEL_5;
 static const adc_atten_t atten = ADC_ATTEN_DB_11;
 static const adc_unit_t unit = ADC_UNIT_1;
 

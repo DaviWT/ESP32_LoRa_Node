@@ -8,7 +8,7 @@
 static const char *TAG = "ADC";
 
 #define DEFAULT_VREF  1100  //Use adc2_vref_to_gpio() to obtain a better estimate
-#define NO_OF_SAMPLES 64    //Multisampling
+#define NO_OF_SAMPLES 16    //Multisampling
 
 static esp_adc_cal_characteristics_t *adc_chars;
 static const adc1_channel_t channel = ADC1_CHANNEL_5;

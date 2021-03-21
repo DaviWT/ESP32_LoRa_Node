@@ -154,6 +154,14 @@ extern "C" void app_main(void)
     // Init GPIO
     GPIO_Init();  // @TODO Continuar implementando conforme o desenvolvimento
 
+    // Config ADC module
+    ADC_ConfigAdc();
+
+    // Get battery voltage
+    uint32_t vBat = ADC_GetVoltage();
+
+    ESP_LOGI(TAG, "vBat = %u", vBat);
+
     // Initialize the NVS (non-volatile storage) for saving and restoring the keys
     ESP_ERROR_CHECK(nvs_flash_init());
 
@@ -172,7 +180,4 @@ extern "C" void app_main(void)
     {
         xTaskCreate(sendMessages, "send_messages", 1024 * 4, (void *)0, 3, nullptr);
     }
-
-    // Creat ADC task
-    xTaskCreate(&taskAdc, "ADC", 1024 * 2, (void *)0, 5, nullptr);
 }

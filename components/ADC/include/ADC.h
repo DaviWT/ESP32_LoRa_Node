@@ -6,6 +6,7 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 
-void taskAdc(void *pvParameter);
+void ADC_ConfigAdc();
+uint32_t ADC_GetVoltage();
 
 #endif /* ADC_H_ */

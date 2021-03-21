@@ -54,10 +54,8 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
     }
 }
 
-void taskAdc(void *pvParameter)
+void ADC_ConfigAdc()
 {
-    ESP_LOGI(TAG, "task ADC started");
-
     //Check if Two Point or Vref are burned into eFuse
     check_efuse();
 
@@ -76,29 +74,30 @@ void taskAdc(void *pvParameter)
     adc_chars = (esp_adc_cal_characteristics_t *)calloc(1, sizeof(esp_adc_cal_characteristics_t));
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(unit, atten, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
     print_char_val_type(val_type);
+}
 
-    //Continuously sample ADC1
-    while(1)
+uint32_t ADC_GetVoltage()
+{
+    uint32_t adc_reading = 0;
+
+    //Multisampling
+    for(int i = 0; i < NO_OF_SAMPLES; i++)
     {
-        uint32_t adc_reading = 0;
-        //Multisampling
-        for(int i = 0; i < NO_OF_SAMPLES; i++)
+        if(unit == ADC_UNIT_1)
         {
-            if(unit == ADC_UNIT_1)
-            {
-                adc_reading += adc1_get_raw((adc1_channel_t)channel);
-            }
-            else
-            {
-                int raw;
-                adc2_get_raw((adc2_channel_t)channel, ADC_WIDTH_BIT_12, &raw);
-                adc_reading += raw;
-            }
+            adc_reading += adc1_get_raw((adc1_channel_t)channel);
         }
-        adc_reading /= NO_OF_SAMPLES;
-        //Convert adc_reading to voltage in mV
-        uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
-        ESP_LOGI(TAG, "Raw: %d\t\tVoltage: %dmV", adc_reading, voltage);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        else
+        {
+            int raw;
+            adc2_get_raw((adc2_channel_t)channel, ADC_WIDTH_BIT_12, &raw);
+            adc_reading += raw;
+        }
     }
+    adc_reading /= NO_OF_SAMPLES;
+
+    //Convert adc_reading to voltage in mV
+    uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
+    ESP_LOGI(TAG, "Raw: %d\t\tVoltage: %dmV", adc_reading, voltage);
+    return voltage;
 }

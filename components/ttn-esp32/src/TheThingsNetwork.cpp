@@ -49,9 +49,9 @@ struct TTNLmicEvent {
     TTNLmicEvent(TTNEvent ev = eEvtNone): event(ev) { }
 
     TTNEvent event;
-    uint8_t port = 0;
-    const uint8_t* message = nullptr;
-    size_t messageSize = 0;
+    uint8_t port;
+    const uint8_t* message;
+    size_t messageSize;
 };
 
 static const char *TAG = "ttn";
@@ -103,17 +103,17 @@ void TheThingsNetwork::configurePins(spi_host_device_t spi_host, uint8_t nss, ui
     LMIC_registerRxMessageCb(messageReceivedCallback, nullptr);
 
     os_init_ex(nullptr);
-    reset(true);
+    reset();
 
     lmicEventQueue = xQueueCreate(4, sizeof(TTNLmicEvent));
     ASSERT(lmicEventQueue != nullptr);
     ttn_hal.startLMICTask();
 }
 
-void TheThingsNetwork::reset(bool doNotDelete)
+void TheThingsNetwork::reset()
 {
     ttn_hal.enterCriticalSection();
-    LMIC_resetc(doNotDelete);
+    LMIC_reset();
     LMIC_setClockError(MAX_CLOCK_ERROR * 4 / 100);
     waitingReason = eWaitingNone;
     ttn_hal.leaveCriticalSection();
@@ -190,17 +190,6 @@ bool TheThingsNetwork::join(const char *devEui, const char *appEui, const char *
         return false;
     
     return joinCore();
-}
-
-bool TheThingsNetwork::load_keys()
-{
-    if (!provisioning.haveKeys())
-    {
-        if (!provisioning.restoreKeys(false))
-            return false;
-    }
-
-    return true;
 }
 
 bool TheThingsNetwork::join()

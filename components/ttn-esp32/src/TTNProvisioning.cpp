@@ -26,7 +26,7 @@ const int MAX_LINE_LENGTH = 128;
 #endif
 
 static const char* const TAG = "ttn_prov";
-static const char* const NVS_FLASH_NAMESPACE = "ttn";
+static const char* const NVS_FLASH_PARTITION = "ttn";
 static const char* const NVS_FLASH_KEY_DEV_EUI = "devEui";
 static const char* const NVS_FLASH_KEY_APP_EUI = "appEui";
 static const char* const NVS_FLASH_KEY_APP_KEY = "appKey";
@@ -227,8 +227,6 @@ void TTNProvisioning::processLine()
             line_buf[24] = 0;
             line_buf[41] = 0;
             is_ok = decodeKeys(line_buf + 8, line_buf + 25, line_buf + 42);
-            if (is_ok)
-                is_ok = saveKeys();
             reset_needed = is_ok;
         }
     }
@@ -239,8 +237,6 @@ void TTNProvisioning::processLine()
         {
             line_buf[25] = 0;
             is_ok = fromMAC(line_buf + 9, line_buf + 26);
-            if (is_ok)
-                is_ok = saveKeys();
             reset_needed = is_ok;
         }
     }
@@ -392,6 +388,9 @@ bool TTNProvisioning::decode(bool incl_dev_eui, const char *dev_eui, const char 
         && !isAllZeros(global_app_eui, sizeof(global_app_eui))
         && !isAllZeros(global_app_key, sizeof(global_app_key));
 
+    if (!saveKeys())
+        return false;
+    
     return true;
 }
 
@@ -403,7 +402,7 @@ bool TTNProvisioning::saveKeys()
     bool result = false;
 
     nvs_handle handle = 0;
-    esp_err_t res = nvs_open(NVS_FLASH_NAMESPACE, NVS_READWRITE, &handle);
+    esp_err_t res = nvs_open(NVS_FLASH_PARTITION, NVS_READWRITE, &handle);
     if (res == ESP_ERR_NVS_NOT_INITIALIZED)
     {
         ESP_LOGW(TAG, "NVS storage is not initialized. Call 'nvs_flash_init()' first.");
@@ -440,7 +439,7 @@ bool TTNProvisioning::restoreKeys(bool silent)
     uint8_t buf_app_key[16];
     
     nvs_handle handle = 0;
-    esp_err_t res = nvs_open(NVS_FLASH_NAMESPACE, NVS_READONLY, &handle);
+    esp_err_t res = nvs_open(NVS_FLASH_PARTITION, NVS_READONLY, &handle);
     if (res == ESP_ERR_NVS_NOT_FOUND)
         return false; // partition does not exist yet
     if (res == ESP_ERR_NVS_NOT_INITIALIZED)

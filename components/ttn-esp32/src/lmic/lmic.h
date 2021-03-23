@@ -35,7 +35,6 @@
 
 #include "oslmic.h"
 #include "lorabase.h"
-#include <stdbool.h>
 
 #if LMIC_DEBUG_LEVEL > 0 || LMIC_X_DEBUG_LEVEL > 0
 # if defined(LMIC_DEBUG_INCLUDE)
@@ -106,7 +105,7 @@ extern "C"{
 #define ARDUINO_LMIC_VERSION_CALC(major, minor, patch, local)	\
 	((((major)*UINT32_C(1)) << 24) | (((minor)*UINT32_C(1)) << 16) | (((patch)*UINT32_C(1)) << 8) | (((local)*UINT32_C(1)) << 0))
 
-#define	ARDUINO_LMIC_VERSION	ARDUINO_LMIC_VERSION_CALC(3, 3, 0, 0)	/* v3.3.0 */
+#define	ARDUINO_LMIC_VERSION	ARDUINO_LMIC_VERSION_CALC(3, 2, 0, 0)	/* v3.2.0 */
 
 #define	ARDUINO_LMIC_VERSION_GET_MAJOR(v)	\
 	((((v)*UINT32_C(1)) >> 24u) & 0xFFu)
@@ -673,7 +672,6 @@ void  LMIC_unjoinAndRejoin (void);
 void  LMIC_shutdown     (void);
 void  LMIC_init         (void);
 void  LMIC_reset        (void);
-void  LMIC_resetc       (bool doNotDelete);
 void  LMIC_clrTxData    (void);
 void  LMIC_setTxData    (void);
 void  LMIC_setTxData_strict(void);

@@ -5,6 +5,7 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_sleep.h"
+#include "lmic.h"
 #include "stdbool.h"
 
 // Tag to indicate at debug log
@@ -32,6 +33,9 @@ bool LoRa_NodeInit()
     if(!LoRa_ModemPinoutInit())
         return false;
 
+    //TODO: function to select correct channel
+    LoRa_SelectChannel(CHANNEL_NUM);
+
     // Set OTAA TTN access keys (comment after first run)
     LoRa_ConfigTTNKeys();
 
@@ -52,6 +56,15 @@ bool LoRa_ModemPinoutInit()
     ttn.configurePins(TTN_SPI_HOST, TTN_PIN_NSS, TTN_PIN_RXTX, TTN_PIN_RST, TTN_PIN_DIO0, TTN_PIN_DIO1);
 
     return true;
+}
+
+void LoRa_SelectChannel(uint8_t channel_number)
+{
+    for(int b = 0; b < 8; ++b)
+    {
+        LMIC_disableSubBand(b);
+    }
+    LMIC_enableChannel(8 + channel_number);
 }
 
 void LoRa_ConfigTTNKeys()

@@ -6,6 +6,7 @@ set(COMPONENT_SRCDIRS
 )
 set(COMPONENT_ADD_INCLUDEDIRS
     "include"
+    "src/lmic"
 )
 set(COMPONENT_REQUIRES
     nvs_flash

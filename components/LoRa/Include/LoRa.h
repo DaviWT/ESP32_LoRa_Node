@@ -6,6 +6,8 @@
 #include "freertos/FreeRTOS.h"
 #include "stdint.h"
 
+#define CHANNEL_NUM 1
+
 #define TTN_SPI_HOST     HSPI_HOST
 #define TTN_SPI_DMA_CHAN 1
 #define TTN_PIN_SPI_SCLK 5
@@ -19,6 +21,7 @@
 
 bool LoRa_NodeInit();
 bool LoRa_ModemPinoutInit();
+void LoRa_SelectChannel(uint8_t channel_number);
 void LoRa_ConfigTTNKeys();
 void LoRa_SetMessageRxCallback();
 bool LoRa_JoinTTN();

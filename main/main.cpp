@@ -30,6 +30,8 @@
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";
 
+#define KEEP_ALIVE_TIMEOUT 6 * 3600 * 1000  // 6 hours
+
 // NOTE:
 // The LoRaWAN frequency and the radio chip must be configured by running 'make menuconfig'.
 // Go to Components / The Things Network, select the appropriate values and save.
@@ -59,6 +61,8 @@ static TheThingsNetwork ttn;
 const unsigned TX_INTERVAL = 30;
 static uint8_t msgData[] = "Hello World!";
 
+static void MakePayloadMsg(char *strPayload);
+
 bool join()
 {
     ESP_LOGI(TAG, "Joining...");
@@ -76,6 +80,13 @@ bool join()
 
 void sendMessages(void *pvParameter)
 {
+    /**
+     * @todo Colocar essa função no lugar correto
+     * 
+     */
+    char payload[30] = "";
+    MakePayloadMsg(payload);
+
     while(1)
     {
         // Send 2 messages
@@ -136,6 +147,34 @@ static void SPI_init()
     ESP_ERROR_CHECK(spi_bus_initialize(TTN_SPI_HOST, &spi_bus_config, TTN_SPI_DMA_CHAN));
 }
 
+static void MakePayloadMsg(char *strPayload)
+{
+    if(strPayload == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to set payload message");
+        return;
+    }
+
+    /**
+     * @todo Uncomment when implemented a way to know the wake-up reason
+     * 
+     */
+    // uint32_t vBat = ADC_GetVoltage();
+    // switch(wakeUpReason)
+    // {
+    //     case WAKEUP_REASON_TIMEOUT:
+    //         sprintf(strPayload, "0|%u|", vBat);
+    //         break;
+    //     case WAKEUP_REASON_GPIO:
+    //         sprintf(strPayload, "1|%u|", vBat);
+    //         break;
+    //     // TODO: O que fazer em caso de wake-up pq acabou a bateria e voltou?
+    //     default:
+    //         ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
+    //         break;
+    // }
+}
+
 extern "C" void app_main(void)
 {
     // Set default debug output
@@ -180,4 +219,10 @@ extern "C" void app_main(void)
     {
         xTaskCreate(sendMessages, "send_messages", 1024 * 4, (void *)0, 3, nullptr);
     }
+
+    /**
+     * @todo Colocar essa função no lugar correto
+     * 
+     */
+    Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT);
 }

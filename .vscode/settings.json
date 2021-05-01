@@ -12,6 +12,13 @@
     "files.associations": {
         "gpio.h": "c",
         "*.inc": "cpp",
-        "*.ipp": "cpp"
-    }
+        "*.ipp": "cpp",
+        "lmic.h": "c",
+        "memory": "cpp",
+        "random": "cpp",
+        "future": "cpp",
+        "optional": "cpp"
+    },
+    "idf.flashType": "UART",
+    "idf.flashBaudRate": "921600"
 }

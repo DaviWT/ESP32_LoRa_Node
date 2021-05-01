@@ -10,15 +10,15 @@
  * High-level API for ttn-esp32.
  *******************************************************************************/
 
-#include "freertos/FreeRTOS.h"
+#include "TheThingsNetwork.h"
+
+#include "TTNLogging.h"
+#include "TTNProvisioning.h"
 #include "esp_event.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
 #include "hal/hal_esp32.h"
 #include "lmic/lmic.h"
-#include "TheThingsNetwork.h"
-#include "TTNProvisioning.h"
-#include "TTNLogging.h"
-
 
 /**
  * @brief Reason the user code is waiting
@@ -33,7 +33,8 @@ enum TTNWaitingReason
 /**
  * @brief Event type
  */
-enum TTNEvent {
+enum TTNEvent
+{
     eEvtNone,
     eEvtJoinCompleted,
     eEvtJoinFailed,
@@ -45,33 +46,34 @@ enum TTNEvent {
 /**
  * @brief Event message sent from LMIC task to waiting client task
  */
-struct TTNLmicEvent {
-    TTNLmicEvent(TTNEvent ev = eEvtNone): event(ev) { }
+struct TTNLmicEvent
+{
+    TTNLmicEvent(TTNEvent ev = eEvtNone) : event(ev) {}
 
     TTNEvent event;
     uint8_t port;
-    const uint8_t* message;
+    const uint8_t *message;
     size_t messageSize;
 };
 
 static const char *TAG = "ttn";
 
-static TheThingsNetwork* ttnInstance;
+static TheThingsNetwork *ttnInstance;
 static QueueHandle_t lmicEventQueue = nullptr;
 static TTNWaitingReason waitingReason = eWaitingNone;
 static TTNProvisioning provisioning;
 #if LMIC_ENABLE_event_logging
-static TTNLogging* logging;
+static TTNLogging *logging;
 #endif
 static TTNRFSettings lastRfSettings[4];
 static TTNRxTxWindow currentWindow;
 
-static void eventCallback(void* userData, ev_t event);
+static void eventCallback(void *userData, ev_t event);
 static void messageReceivedCallback(void *userData, uint8_t port, const uint8_t *message, size_t messageSize);
 static void messageTransmittedCallback(void *userData, int success);
-static void saveRFSettings(TTNRFSettings& rfSettings);
-static void clearRFSettings(TTNRFSettings& rfSettings);
-
+static void saveRFSettings(TTNRFSettings &rfSettings);
+static void clearRFSettings(TTNRFSettings &rfSettings);
+static void lmicEventCallback(void *userData, ev_t ev);
 
 TheThingsNetwork::TheThingsNetwork()
     : messageCallback(nullptr)
@@ -99,7 +101,7 @@ void TheThingsNetwork::configurePins(spi_host_device_t spi_host, uint8_t nss, ui
     logging = TTNLogging::initInstance();
 #endif
 
-    LMIC_registerEventCb(eventCallback, nullptr);
+    LMIC_registerEventCb(lmicEventCallback, nullptr);
     LMIC_registerRxMessageCb(messageReceivedCallback, nullptr);
 
     os_init_ex(nullptr);
@@ -138,20 +140,19 @@ void TheThingsNetwork::startup()
 
 bool TheThingsNetwork::provision(const char *devEui, const char *appEui, const char *appKey)
 {
-    if (!provisioning.decodeKeys(devEui, appEui, appKey))
+    if(!provisioning.decodeKeys(devEui, appEui, appKey))
         return false;
-    
+
     return provisioning.saveKeys();
 }
 
 bool TheThingsNetwork::provisionWithMAC(const char *appEui, const char *appKey)
 {
-    if (!provisioning.fromMAC(appEui, appKey))
+    if(!provisioning.fromMAC(appEui, appKey))
         return false;
-    
+
     return provisioning.saveKeys();
 }
-
 
 void TheThingsNetwork::startProvisioningTask()
 {
@@ -167,13 +168,13 @@ void TheThingsNetwork::startProvisioningTask()
 void TheThingsNetwork::waitForProvisioning()
 {
 #if defined(TTN_HAS_AT_COMMANDS)
-    if (isProvisioned())
+    if(isProvisioned())
     {
         ESP_LOGI(TAG, "Device is already provisioned");
         return;
     }
 
-    while (!provisioning.haveKeys())
+    while(!provisioning.haveKeys())
         vTaskDelay(pdMS_TO_TICKS(1000));
 
     ESP_LOGI(TAG, "Device successfully provisioned");
@@ -186,17 +187,17 @@ void TheThingsNetwork::waitForProvisioning()
 
 bool TheThingsNetwork::join(const char *devEui, const char *appEui, const char *appKey)
 {
-    if (!provisioning.decodeKeys(devEui, appEui, appKey))
+    if(!provisioning.decodeKeys(devEui, appEui, appKey))
         return false;
-    
+
     return joinCore();
 }
 
 bool TheThingsNetwork::join()
 {
-    if (!provisioning.haveKeys())
+    if(!provisioning.haveKeys())
     {
-        if (!provisioning.restoreKeys(false))
+        if(!provisioning.restoreKeys(false))
             return false;
     }
 
@@ -205,7 +206,7 @@ bool TheThingsNetwork::join()
 
 bool TheThingsNetwork::joinCore()
 {
-    if (!provisioning.haveKeys())
+    if(!provisioning.haveKeys())
     {
         ESP_LOGW(TAG, "Device EUI, App EUI and/or App key have not been provided");
         return false;
@@ -226,7 +227,7 @@ bool TheThingsNetwork::joinCore()
 TTNResponseCode TheThingsNetwork::transmitMessage(const uint8_t *payload, size_t length, port_t port, bool confirm)
 {
     ttn_hal.enterCriticalSection();
-    if (waitingReason != eWaitingNone || (LMIC.opmode & OP_TXRXPEND) != 0)
+    if(waitingReason != eWaitingNone || (LMIC.opmode & OP_TXRXPEND) != 0)
     {
         ttn_hal.leaveCriticalSection();
         return kTTNErrorTransmissionFailed;
@@ -239,15 +240,15 @@ TTNResponseCode TheThingsNetwork::transmitMessage(const uint8_t *payload, size_t
     ttn_hal.wakeUp();
     ttn_hal.leaveCriticalSection();
 
-    while (true)
+    while(true)
     {
         TTNLmicEvent result;
         xQueueReceive(lmicEventQueue, &result, portMAX_DELAY);
 
-        switch (result.event)
+        switch(result.event)
         {
             case eEvtMessageReceived:
-                if (messageCallback != nullptr)
+                if(messageCallback != nullptr)
                     messageCallback(result.message, result.messageSize, result.port);
                 break;
 
@@ -268,12 +269,11 @@ void TheThingsNetwork::onMessage(TTNMessageCallback callback)
     messageCallback = callback;
 }
 
-
 bool TheThingsNetwork::isProvisioned()
 {
-    if (provisioning.haveKeys())
+    if(provisioning.haveKeys())
         return true;
-    
+
     provisioning.restoreKeys(true);
 
     return provisioning.haveKeys();
@@ -325,16 +325,14 @@ int TheThingsNetwork::rssi()
     return LMIC.rssi;
 }
 
-
 // --- Callbacks ---
 
 #if CONFIG_LOG_DEFAULT_LEVEL >= 3 || LMIC_ENABLE_event_logging
-const char *eventNames[] = { LMIC_EVENT_NAME_TABLE__INIT };
+const char *eventNames[] = {LMIC_EVENT_NAME_TABLE__INIT};
 #endif
 
-
 // Called by LMIC when an LMIC event (join, join failed, reset etc.) occurs
-void eventCallback(void* userData, ev_t event)
+void eventCallback(void *userData, ev_t event)
 {
     // update monitoring information
     switch(event)
@@ -347,7 +345,7 @@ void eventCallback(void* userData, ev_t event)
             break;
 
         case EV_RXSTART:
-            if (currentWindow != kTTNRx1Window)
+            if(currentWindow != kTTNRx1Window)
             {
                 currentWindow = kTTNRx1Window;
                 saveRFSettings(lastRfSettings[static_cast<int>(kTTNRx1Window)]);
@@ -372,19 +370,19 @@ void eventCallback(void* userData, ev_t event)
 
     TTNEvent ttnEvent = eEvtNone;
 
-    if (waitingReason == eWaitingForJoin)
+    if(waitingReason == eWaitingForJoin)
     {
-        if (event == EV_JOINED)
+        if(event == EV_JOINED)
         {
             ttnEvent = eEvtJoinCompleted;
         }
-        else if (event == EV_REJOIN_FAILED || event == EV_RESET)
+        else if(event == EV_REJOIN_FAILED || event == EV_RESET)
         {
             ttnEvent = eEvtJoinFailed;
         }
     }
 
-    if (ttnEvent == eEvtNone)
+    if(ttnEvent == eEvtNone)
         return;
 
     TTNLmicEvent result(ttnEvent);
@@ -410,18 +408,68 @@ void messageTransmittedCallback(void *userData, int success)
     xQueueSend(lmicEventQueue, &result, pdMS_TO_TICKS(100));
 }
 
-
 // --- Helpers
 
-
-void saveRFSettings(TTNRFSettings& rfSettings)
+void saveRFSettings(TTNRFSettings &rfSettings)
 {
     rfSettings.spreadingFactor = static_cast<TTNSpreadingFactor>(getSf(LMIC.rps) + 1);
     rfSettings.bandwidth = static_cast<TTNBandwidth>(getBw(LMIC.rps) + 1);
     rfSettings.frequency = LMIC.freq;
 }
 
-void clearRFSettings(TTNRFSettings& rfSettings)
+void clearRFSettings(TTNRFSettings &rfSettings)
 {
     memset(&rfSettings, 0, sizeof(rfSettings));
+}
+
+static void lmicEventCallback(void *userData, ev_t ev)
+{
+    if(ev <= EV_JOIN_TXCOMPLETE)
+        ESP_LOGI(TAG, "Event %s", eventNames[ev]);
+    switch(ev)
+    {
+        case EV_SCAN_TIMEOUT:
+            break;
+        case EV_BEACON_FOUND:
+            break;
+        case EV_BEACON_MISSED:
+            break;
+        case EV_BEACON_TRACKED:
+            break;
+        case EV_JOINING:
+            break;
+        case EV_JOINED:
+            break;
+        case EV_JOIN_FAILED:
+            break;
+        case EV_REJOIN_FAILED:
+            break;
+        case EV_TXCOMPLETE:
+            if(LMIC.txrxFlags & TXRX_ACK)
+                ESP_LOGI(TAG, "ACK received");
+            if(LMIC.dataLen)
+                ESP_LOGI(TAG, "Received %d bytes of payload", LMIC.dataLen);
+            break;
+        case EV_LOST_TSYNC:
+            break;
+        case EV_RESET:
+            break;
+        case EV_RXCOMPLETE:
+            break;
+        case EV_LINK_DEAD:
+            break;
+        case EV_LINK_ALIVE:
+            break;
+        case EV_TXSTART:
+            break;
+        case EV_TXCANCELED:
+            break;
+        case EV_RXSTART:
+            break;
+        case EV_JOIN_TXCOMPLETE:
+            break;
+        default:
+            ESP_LOGI(TAG, "Unknown event: %d", ev);
+            break;
+    }
 }

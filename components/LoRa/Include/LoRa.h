@@ -23,6 +23,7 @@ bool LoRa_NodeInit();
 bool LoRa_ModemPinoutInit();
 void LoRa_SelectChannel(uint8_t channel_number);
 void LoRa_ConfigTTNKeys();
+void LoRa_ConfigTTNKeys_ABP();
 void LoRa_SetMessageRxCallback();
 bool LoRa_JoinTTN();
 

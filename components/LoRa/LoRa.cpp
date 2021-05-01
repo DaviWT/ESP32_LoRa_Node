@@ -11,18 +11,25 @@
 // Tag to indicate at debug log
 static const char *TAG = "LoRa";
 
-// Copy the below hex string from the "Device EUI" field
-// on your device's overview page in the TTN console.
+/* =============== OTAA =============== */
 const char *devEui = "006507095EF37549";
-
-// Copy the below two lines from bottom of the same page
 const char *appEui = "70B3D57ED003C387";
 const char *appKey = "C0A9C01E65BB1B3FAB14360971CCBD3C";
+/* ==================================== */
+
+/* =============== ABP =============== */
+// These should be in big-endian (aka msb).
+static u1_t NWKSKEY[16] = {0x8E, 0xE3, 0x20, 0xB5, 0xA8, 0xE1, 0xC4, 0xEF, 0x5A, 0xF1, 0x59, 0xB5, 0x3F, 0xD0, 0xA3, 0x67};
+
+static u1_t APPSKEY[16] = {0x43, 0xFB, 0x7F, 0xFF, 0x20, 0xE9, 0x09, 0x81, 0x77, 0xAC, 0x28, 0x88, 0x16, 0xE1, 0x0E, 0x79};
+// The library converts the address to network byte order as needed, so this should be in big-endian (aka msb) too.
+static const u4_t DEVADDR = 0x2603168E;
+/* =================================== */
 
 static TheThingsNetwork ttn;
 
-const unsigned TX_INTERVAL = 30;
-static uint8_t msgData[] = "Hello World!";
+const unsigned TX_INTERVAL = 5;
+static uint8_t msgData[] = "Davi, Hello World!";
 
 static bool LoRa_ModuleSpiBusInit();
 static void messageReceived(const uint8_t *message, size_t length, port_t port);
@@ -33,14 +40,20 @@ bool LoRa_NodeInit()
     if(!LoRa_ModemPinoutInit())
         return false;
 
-    //TODO: function to select correct channel
+    // Set ABP TTN access keys
+    LoRa_ConfigTTNKeys_ABP();
+
+    //Selects single channel from certain band
     LoRa_SelectChannel(CHANNEL_NUM);
 
-    // Set OTAA TTN access keys (comment after first run)
-    LoRa_ConfigTTNKeys();
+    // Disable link check validation
+    LMIC_setLinkCheckMode(0);
 
-    // Set callback function at receving LoRa messages
-    LoRa_SetMessageRxCallback();
+    // TTN uses SF9 for its RX2 window.
+    LMIC.dn2Dr = DR_SF9;
+
+    // Set data rate and transmit power for uplink
+    LMIC_setDrTxpow(DR_SF9, 14);
 
     return true;
 }
@@ -53,6 +66,7 @@ bool LoRa_ModemPinoutInit()
         return false;
     }
 
+    // Configures PINS and init LMIC OS
     ttn.configurePins(TTN_SPI_HOST, TTN_PIN_NSS, TTN_PIN_RXTX, TTN_PIN_RST, TTN_PIN_DIO0, TTN_PIN_DIO1);
 
     return true;
@@ -71,6 +85,11 @@ void LoRa_ConfigTTNKeys()
 {
     // Can be commented after the first run as the data is saved in NVS
     ttn.provision(devEui, appEui, appKey);
+}
+
+void LoRa_ConfigTTNKeys_ABP()
+{
+    LMIC_setSession(0x13, DEVADDR, NWKSKEY, APPSKEY);
 }
 
 void LoRa_SetMessageRxCallback()
@@ -147,9 +166,5 @@ void taskLoRaTX(void *pvParameter)
 
         // startup
         ttn.startup();
-
-        // join again
-        if(!LoRa_JoinTTN())
-            return;
     }
 }

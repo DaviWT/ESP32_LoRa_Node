@@ -64,11 +64,7 @@ extern "C" void app_main(void)
         esp_restart();
     }
 
-    if(!LoRa_JoinTTN())
-    {
-        ESP_LOGE(TAG, "Couldn't join TTN's application!");
-        esp_restart();
-    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     if(xTaskCreate(&taskLoRaTX, "LoRa_TX", 4096, NULL, 5, &xtaskLoRaTX) != pdTRUE)
     {

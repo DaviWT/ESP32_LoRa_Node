@@ -61,6 +61,8 @@ static TheThingsNetwork ttn;
 const unsigned TX_INTERVAL = 30;
 static uint8_t msgData[] = "Hello World!";
 
+#define MSG_TYPE_KEEP_ALIVE 0
+#define MSG_TYPE_INFORM_PIN 1
 static void MakePayloadMsg(char *strPayload);
 
 bool join()
@@ -155,24 +157,31 @@ static void MakePayloadMsg(char *strPayload)
         return;
     }
 
-    /**
-     * @todo Uncomment when implemented a way to know the wake-up reason
-     * 
-     */
-    // uint32_t vBat = ADC_GetVoltage();
-    // switch(wakeUpReason)
-    // {
-    //     case WAKEUP_REASON_TIMEOUT:
-    //         sprintf(strPayload, "0|%u|", vBat);
-    //         break;
-    //     case WAKEUP_REASON_GPIO:
-    //         sprintf(strPayload, "1|%u|", vBat);
-    //         break;
-    //     // TODO: O que fazer em caso de wake-up pq acabou a bateria e voltou?
-    //     default:
-    //         ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
-    //         break;
-    // }
+    // Get current battery voltage
+    uint32_t vBat = ADC_GetVoltage();
+
+    // Check last reset reason
+    esp_reset_reason_t resetReason = esp_reset_reason();
+    if(resetReason != ESP_RST_DEEPSLEEP)
+    {
+        sprintf(strPayload, "%d|%u|", MSG_TYPE_KEEP_ALIVE, vBat);
+        return;
+    }
+
+    // Check last wake-up reason
+    esp_sleep_wakeup_cause_t wakeUpReason = esp_sleep_get_wakeup_cause();
+    switch(wakeUpReason)
+    {
+        case ESP_SLEEP_WAKEUP_TIMER:
+            sprintf(strPayload, "%d|%u|", MSG_TYPE_KEEP_ALIVE, vBat);
+            break;
+        case ESP_SLEEP_WAKEUP_EXT0:
+            sprintf(strPayload, "%d|%u|", MSG_TYPE_INFORM_PIN, vBat);
+            break;
+        default:
+            ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
+            break;
+    }
 }
 
 extern "C" void app_main(void)

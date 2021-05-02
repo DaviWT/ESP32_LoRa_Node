@@ -1,6 +1,7 @@
 #ifndef MAIN_SLEEP_H_
 #define MAIN_SLEEP_H_
 
+#include "esp_sleep.h"
 #include "stdint.h"
 
 #define NO_TIMER_WAKEUP   0

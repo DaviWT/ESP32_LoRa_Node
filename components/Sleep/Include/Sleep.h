@@ -2,6 +2,7 @@
 #define MAIN_SLEEP_H_
 
 #include "esp_event.h"
+#include "esp_sleep.h"
 #include "freertos/FreeRTOS.h"
 #include "stdint.h"
 

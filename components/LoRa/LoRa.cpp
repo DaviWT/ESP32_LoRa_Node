@@ -32,6 +32,7 @@ const unsigned TX_INTERVAL = 5;
 static uint8_t msgData[] = "Davi, Hello World!";
 
 static bool LoRa_ModuleSpiBusInit();
+static void LoRa_LmicReset();
 static void messageReceived(const uint8_t *message, size_t length, port_t port);
 
 bool LoRa_NodeInit()
@@ -40,20 +41,7 @@ bool LoRa_NodeInit()
     if(!LoRa_ModemPinoutInit())
         return false;
 
-    // Set ABP TTN access keys
-    LoRa_ConfigTTNKeys_ABP();
-
-    //Selects single channel from certain band
-    LoRa_SelectChannel(CHANNEL_NUM);
-
-    // Disable link check validation
-    LMIC_setLinkCheckMode(0);
-
-    // TTN uses SF9 for its RX2 window.
-    LMIC.dn2Dr = DR_SF9;
-
-    // Set data rate and transmit power for uplink
-    LMIC_setDrTxpow(DR_SF9, 14);
+    LoRa_LmicReset();
 
     return true;
 }
@@ -132,6 +120,28 @@ static bool LoRa_ModuleSpiBusInit()
     return true;
 }
 
+static void LoRa_LmicReset()
+{
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    // Set ABP TTN access keys
+    LoRa_ConfigTTNKeys_ABP();
+
+    //Selects single channel from certain band
+    LoRa_SelectChannel(CHANNEL_NUM);
+
+    // Disable link check validation
+    LMIC_setLinkCheckMode(0);
+
+    // TTN uses SF9 for its RX2 window.
+    LMIC.dn2Dr = DR_SF9;
+
+    // Set data rate and transmit power for uplink
+    LMIC_setDrTxpow(DR_SF9, 14);
+
+    vTaskDelay(pdMS_TO_TICKS(100));
+}
+
 static void messageReceived(const uint8_t *message, size_t length, port_t port)
 {
     //TODO: refactor debug log logic to use ESP_LOGI
@@ -166,5 +176,6 @@ void taskLoRaTX(void *pvParameter)
 
         // startup
         ttn.startup();
+        LoRa_LmicReset();
     }
 }

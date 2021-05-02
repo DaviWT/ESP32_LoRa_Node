@@ -98,6 +98,22 @@ bool LoRa_JoinTTN()
     return true;
 }
 
+bool LoRa_SendPacket(uint8_t *txData, size_t dataSize)
+{
+    for(int i = 0; i < MAX_TX_ATTEMPTS; i++)
+    {
+        ESP_LOGI(TAG, "Sending packet... (attempt %d)", i + 1);
+        if(ttn.transmitMessage(txData, dataSize) == kTTNSuccessfulTransmission)
+        {
+            ESP_LOGI(TAG, "Packet sent!");
+            return true;
+        }
+        ESP_LOGE(TAG, "Transmission attempt %d failed!", i + 1);
+    }
+
+    return false;
+}
+
 static bool LoRa_ModuleSpiBusInit()
 {
     spi_bus_config_t spi_bus_config;
@@ -157,9 +173,7 @@ void taskLoRaTX(void *pvParameter)
         // Send 2 messages
         for(int i = 0; i < 2; i++)
         {
-            ESP_LOGI(TAG, "Sending message...");
-            TTNResponseCode res = ttn.transmitMessage(msgData, sizeof(msgData) - 1);
-            if(res == kTTNSuccessfulTransmission)
+            if(LoRa_SendPacket(msgData, strlen((char *)msgData)))
                 ESP_LOGI(TAG, "Message sent.");
             else
                 ESP_LOGI(TAG, "Transmission failed.");

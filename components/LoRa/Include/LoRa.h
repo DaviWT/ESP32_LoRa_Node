@@ -19,6 +19,8 @@
 #define TTN_PIN_DIO0     26
 #define TTN_PIN_DIO1     35
 
+#define MAX_TX_ATTEMPTS 3
+
 bool LoRa_NodeInit();
 bool LoRa_ModemPinoutInit();
 void LoRa_SelectChannel(uint8_t channel_number);
@@ -26,6 +28,7 @@ void LoRa_ConfigTTNKeys();
 void LoRa_ConfigTTNKeys_ABP();
 void LoRa_SetMessageRxCallback();
 bool LoRa_JoinTTN();
+bool LoRa_SendPacket(uint8_t txData, size_t dataSize);
 
 void taskLoRaTX(void *pvParameter);
 

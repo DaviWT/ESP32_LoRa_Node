@@ -2,6 +2,7 @@
 
 #include "LoRa.h"
 
+#include "ADC.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_sleep.h"
@@ -34,6 +35,7 @@ static uint8_t msgData[] = "Davi, Hello World!";
 static bool LoRa_ModuleSpiBusInit();
 static void LoRa_LmicReset();
 static void messageReceived(const uint8_t *message, size_t length, port_t port);
+static void LoRa_MakePayloadMsg(char *strPayload);
 
 bool LoRa_NodeInit()
 {
@@ -69,12 +71,6 @@ void LoRa_SelectChannel(uint8_t channel_number)
     LMIC_enableChannel(8 + channel_number);
 }
 
-void LoRa_ConfigTTNKeys()
-{
-    // Can be commented after the first run as the data is saved in NVS
-    ttn.provision(devEui, appEui, appKey);
-}
-
 void LoRa_ConfigTTNKeys_ABP()
 {
     LMIC_setSession(0x13, DEVADDR, NWKSKEY, APPSKEY);
@@ -83,19 +79,6 @@ void LoRa_ConfigTTNKeys_ABP()
 void LoRa_SetMessageRxCallback()
 {
     ttn.onMessage(messageReceived);
-}
-
-bool LoRa_JoinTTN()
-{
-    ESP_LOGI(TAG, "Joining TTN...");
-    if(!ttn.join())
-    {
-        ESP_LOGE(TAG, "Failed to join!");
-        return false;
-    }
-
-    ESP_LOGI(TAG, "Joined!");
-    return true;
 }
 
 bool LoRa_SendPacket(uint8_t *txData, size_t dataSize)
@@ -112,6 +95,21 @@ bool LoRa_SendPacket(uint8_t *txData, size_t dataSize)
     }
 
     return false;
+}
+
+bool LoRa_SendMessageToApplication()
+{
+    char packetStr[100] = "";
+    LoRa_MakePayloadMsg(packetStr);
+
+    if(!LoRa_SendPacket((uint8_t *)packetStr, strlen(packetStr)))
+    {
+        ESP_LOGE(TAG, "Failed to send message to application!");
+        return false;
+    }
+
+    ESP_LOGI(TAG, "Message sent!");
+    return true;
 }
 
 static bool LoRa_ModuleSpiBusInit()
@@ -164,6 +162,41 @@ static void messageReceived(const uint8_t *message, size_t length, port_t port)
     ESP_LOGI(TAG, "Message of %d bytes received on port %d:", length, port);
     for(int i = 0; i < length; i++)
         ESP_LOGI(TAG, " %02x", message[i]);
+}
+
+static void LoRa_MakePayloadMsg(char *strPayload)
+{
+    if(strPayload == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to set payload message");
+        return;
+    }
+
+    // Get current battery voltage
+    uint32_t vBat = ADC_GetVoltage();
+
+    // Check last reset reason
+    esp_reset_reason_t resetReason = esp_reset_reason();
+    if(resetReason != ESP_RST_DEEPSLEEP)
+    {
+        sprintf(strPayload, "%d|%u|", MSG_TYPE_KEEP_ALIVE, vBat);
+        return;
+    }
+
+    // Check last wake-up reason
+    esp_sleep_wakeup_cause_t wakeUpReason = esp_sleep_get_wakeup_cause();
+    switch(wakeUpReason)
+    {
+        case ESP_SLEEP_WAKEUP_TIMER:
+            sprintf(strPayload, "%d|%u|", MSG_TYPE_KEEP_ALIVE, vBat);
+            break;
+        case ESP_SLEEP_WAKEUP_EXT0:
+            sprintf(strPayload, "%d|%u|", MSG_TYPE_INFORM_PIN, vBat);
+            break;
+        default:
+            ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
+            break;
+    }
 }
 
 void taskLoRaTX(void *pvParameter)

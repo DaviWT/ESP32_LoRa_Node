@@ -1,2 +1,3 @@
 idf_component_register( SRCS Sleep.cpp
-                        INCLUDE_DIRS include )
+                        INCLUDE_DIRS include 
+                        REQUIRES LoRa)

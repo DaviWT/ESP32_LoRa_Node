@@ -27,11 +27,10 @@
 #include "freertos/FreeRTOS.h"
 #include "nvs_flash.h"
 
+#define DEBUG_MODE 1
+
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";
-
-// Task handles
-TaskHandle_t xtaskLoRaTX = NULL;
 
 static void GPIO_Init()
 {
@@ -46,23 +45,20 @@ extern "C" void app_main(void)
     // Set default debug output
     esp_log_set_vprintf(vprintf);
 
-    // Set debug log level
+#if DEBUG_MODE
     esp_log_level_set("*", ESP_LOG_INFO);
+#else
+    esp_log_level_set("*", ESP_LOG_NONE);
+#endif
 
     // Inital log to indicate execution start
-    ESP_LOGW(TAG, "BEGINNING OF APP_MAIN()!");
-    vTaskDelay(pdMS_TO_TICKS(500));
+    ESP_LOGI(TAG, "INITIALIZING SYSTEM MODULES...");
 
     // Init GPIO
     GPIO_Init();  // @TODO Continuar implementando conforme o desenvolvimento
 
     // Config ADC module
     ADC_ConfigAdc();
-
-    // Get battery voltage
-    uint32_t vBat = ADC_GetVoltage();
-
-    ESP_LOGI(TAG, "vBat = %u", vBat);
 
     // Initialize the NVS (non-volatile storage) for saving and restoring the keys
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -73,12 +69,17 @@ extern "C" void app_main(void)
         esp_restart();
     }
 
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    /********************************************************************************/
 
-    if(xTaskCreate(&taskLoRaTX, "LoRa_TX", 4096, NULL, 5, &xtaskLoRaTX) != pdTRUE)
-    {
-        ESP_LOGE(TAG, "Failed to init LoRa_TX task!");
-    }
+    ESP_LOGI(TAG, "SENDING PACKET AND SLEEPING...");
+    vTaskDelay(pdMS_TO_TICKS(50));
 
-    ESP_LOGW(TAG, "END OF APP_MAIN()!");
+    // SEND MESSAGE TO TTN
+    LoRa_SendMessageToApplication();
+
+    Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
+
+    // NOT SUPPOSED TO REACH HERE
+    ESP_LOGE(TAG, "INSOMNIA! SHOULD'VE SLEPT!");
+    vTaskDelay(pdMS_TO_TICKS(500));
 }

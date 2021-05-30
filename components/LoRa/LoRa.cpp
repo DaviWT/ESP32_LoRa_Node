@@ -112,6 +112,12 @@ bool LoRa_SendMessageToApplication()
     return true;
 }
 
+void LORA_Shutdown()
+{
+    // shutdown
+    ttn.shutdown();
+}
+
 static bool LoRa_ModuleSpiBusInit()
 {
     spi_bus_config_t spi_bus_config;
@@ -196,33 +202,5 @@ static void LoRa_MakePayloadMsg(char *strPayload)
         default:
             ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
             break;
-    }
-}
-
-void taskLoRaTX(void *pvParameter)
-{
-    while(1)
-    {
-        // Send 2 messages
-        for(int i = 0; i < 2; i++)
-        {
-            if(LoRa_SendPacket(msgData, strlen((char *)msgData)))
-                ESP_LOGI(TAG, "Message sent.");
-            else
-                ESP_LOGI(TAG, "Transmission failed.");
-
-            vTaskDelay(TX_INTERVAL * pdMS_TO_TICKS(1000));
-        }
-
-        // shutdown
-        ttn.shutdown();
-
-        // go to sleep
-        ESP_LOGI(TAG, "Sleeping for 30s...");
-        vTaskDelay(pdMS_TO_TICKS(30000));
-
-        // startup
-        ttn.startup();
-        LoRa_LmicReset();
     }
 }

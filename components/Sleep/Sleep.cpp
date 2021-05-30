@@ -2,6 +2,7 @@
 
 #include "Sleep.h"
 
+#include "LoRa.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_sleep.h"
@@ -17,8 +18,8 @@ static void SetWakeUpConfig(uint64_t microsecondsToWakeUp);
  */
 void Sleep_EnterSleepMode(uint64_t microsecondsToWakeUp)
 {
-    // @TODO Desligar modulo LORA
-    // LORA_Shutdown();
+    // Desliga modulo LORA
+    LORA_Shutdown();
 
     // @TODO Desligar OLED (Maybe)
     // OLED_Shutdown();

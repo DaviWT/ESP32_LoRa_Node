@@ -27,7 +27,7 @@
 #include "freertos/FreeRTOS.h"
 #include "nvs_flash.h"
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";
@@ -75,7 +75,7 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(50));
 
     // SEND MESSAGE TO TTN
-    LoRa_SendMessageToApplication();
+    // LoRa_SendMessageToApplication();
 
     Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
 

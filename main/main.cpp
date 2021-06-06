@@ -29,6 +29,8 @@
 
 #define DEBUG_MODE 0
 
+#define NUM_OF_PACKETS_DISCHARGE_TEST 100
+
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";
 
@@ -38,6 +40,18 @@ static void GPIO_Init()
 
     // Initialize the GPIO ISR handler service
     ESP_ERROR_CHECK(gpio_install_isr_service(ESP_INTR_FLAG_IRAM));
+}
+
+static void blinkLed_TEST()
+{
+    gpio_set_level(GPIO_NUM_25, 0);
+    int i;
+    for(i = 0; i < 10; i++)
+    {
+        gpio_set_level(GPIO_NUM_25, i % 2);
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    gpio_set_level(GPIO_NUM_25, 0);
 }
 
 extern "C" void app_main(void)
@@ -75,7 +89,11 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(50));
 
     // SEND MESSAGE TO TTN
-    // LoRa_SendMessageToApplication();
+    int i;
+    for(i = 0; i < NUM_OF_PACKETS_DISCHARGE_TEST; i++)
+        LoRa_SendMessageToApplication();
+
+    blinkLed_TEST();
 
     Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
 

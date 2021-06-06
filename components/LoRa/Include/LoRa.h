@@ -19,7 +19,7 @@
 #define TTN_PIN_DIO0     26
 #define TTN_PIN_DIO1     35
 
-#define MAX_TX_ATTEMPTS       3
+#define MAX_TX_ATTEMPTS       1
 #define KEEP_ALIVE_TIMEOUT_MS 6 * 3600 * 1000                  // 6 hours in millisseconds
 #define KEEP_ALIVE_TIMEOUT_uS KEEP_ALIVE_TIMEOUT_MS * 1000ULL  // 6 hours in microsseconds
 #define MSG_TYPE_KEEP_ALIVE   0

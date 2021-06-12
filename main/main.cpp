@@ -90,15 +90,18 @@ extern "C" void app_main(void)
 
     // SEND MESSAGE TO TTN
     gpio_set_level(GPIO_NUM_25, 1);
-    int i;
-    for(i = 0; i < NUM_OF_PACKETS_DISCHARGE_TEST; i++)
-        LoRa_SendMessageToApplication();
+    // int i;
+    // for(i = 0; i < NUM_OF_PACKETS_DISCHARGE_TEST; i++)
+    //     LoRa_SendMessageToApplication();
 
-    blinkLed_TEST();
+    // blinkLed_TEST();
 
-    Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
+    // Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
 
     // NOT SUPPOSED TO REACH HERE
-    ESP_LOGE(TAG, "INSOMNIA! SHOULD'VE SLEPT!");
-    vTaskDelay(pdMS_TO_TICKS(500));
+    // ESP_LOGE(TAG, "INSOMNIA! SHOULD'VE SLEPT!");
+    // vTaskDelay(pdMS_TO_TICKS(500));
+
+    while(1)
+        vTaskDelay(pdMS_TO_TICKS(500));
 }

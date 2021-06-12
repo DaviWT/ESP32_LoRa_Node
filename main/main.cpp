@@ -29,7 +29,7 @@
 
 #define DEBUG_MODE 0
 
-#define NUM_OF_PACKETS_DISCHARGE_TEST 100
+#define NUM_OF_PACKETS_DISCHARGE_TEST 1000
 
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";
@@ -89,6 +89,7 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(50));
 
     // SEND MESSAGE TO TTN
+    gpio_set_level(GPIO_NUM_25, 1);
     int i;
     for(i = 0; i < NUM_OF_PACKETS_DISCHARGE_TEST; i++)
         LoRa_SendMessageToApplication();

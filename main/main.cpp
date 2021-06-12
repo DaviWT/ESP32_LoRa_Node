@@ -20,6 +20,7 @@
 
 #include "ADC.h"
 #include "LoRa.h"
+#include "OLED.h"
 #include "Sleep.h"
 #include "driver/gpio.h"
 #include "esp_event.h"
@@ -59,6 +60,9 @@ extern "C" void app_main(void)
 
     // Config ADC module
     ADC_ConfigAdc();
+
+    // Init OLED display
+    OLED_Init(OLED_SDA_PIN, OLED_SCL_PIN, OLED_RST_PIN);
 
     // Initialize the NVS (non-volatile storage) for saving and restoring the keys
     ESP_ERROR_CHECK(nvs_flash_init());

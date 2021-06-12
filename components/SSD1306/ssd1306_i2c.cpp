@@ -13,10 +13,11 @@ void i2c_master_init(SSD1306_t* dev, int16_t sda, int16_t scl, int16_t reset)
     i2c_config_t i2c_config = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = sda,
-        .scl_io_num = scl,
         .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_io_num = scl,
         .scl_pullup_en = GPIO_PULLUP_ENABLE,
-        .master.clk_speed = 1000000};
+        .master.clk_speed = 1000000,
+    };
     i2c_param_config(I2C_NUM_0, &i2c_config);
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
 
@@ -96,6 +97,29 @@ void i2c_init(SSD1306_t* dev, int width, int height)
         ESP_LOGE(tag, "OLED configuration failed. code: 0x%.2X", espRc);
     }
     i2c_cmd_link_delete(cmd);
+}
+
+bool i2c_display_off(SSD1306_t* dev)
+{
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (dev->_address << 1) | I2C_MASTER_WRITE, true);
+    i2c_master_write_byte(cmd, OLED_CONTROL_BYTE_CMD_SINGLE, true);
+    i2c_master_write_byte(cmd, OLED_CMD_DISPLAY_OFF, true);  // AEh
+    i2c_master_stop(cmd);
+
+    esp_err_t espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10 / portTICK_PERIOD_MS);
+
+    i2c_cmd_link_delete(cmd);
+
+    if(espRc != ESP_OK)
+    {
+        ESP_LOGE(tag, "OLED configuration failed. code: 0x%.2X", espRc);
+        return false;
+    }
+
+    return true;
 }
 
 void i2c_display_image(SSD1306_t* dev, int page, int seg, uint8_t* images, int width)

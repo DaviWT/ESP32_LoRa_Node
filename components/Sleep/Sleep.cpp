@@ -8,7 +8,6 @@
 #include "esp_sleep.h"
 #include "stdbool.h"
 
-static void SetPinsToHold();
 static void SetWakeUpConfig(uint64_t microsecondsToWakeUp);
 
 /**
@@ -24,25 +23,11 @@ void Sleep_EnterSleepMode(uint64_t microsecondsToWakeUp)
     // @TODO Desligar OLED (Maybe)
     // OLED_Shutdown();
 
-    // Set pins to hold during the deep sleep
-    SetPinsToHold();
-
     // Set wake up sources
     SetWakeUpConfig(microsecondsToWakeUp);
 
     // Start deep sleep
     esp_deep_sleep_start();
-}
-
-/**
- * @brief Set pins to hold their state during the deep sleep 
- * 
- */
-static void SetPinsToHold()
-{
-    gpio_set_level(GPIO_NUM_25, 0);
-    gpio_hold_en(GPIO_NUM_25);
-    gpio_deep_sleep_hold_en();
 }
 
 /**

@@ -8,16 +8,16 @@
 
 #define tag "SSD1306"
 
-void i2c_master_init(SSD1306_t* dev, int16_t sda, int16_t scl, int16_t reset)
+void i2c_master_init(SSD1306_t* dev, gpio_num_t sda, gpio_num_t scl, gpio_num_t reset)
 {
     i2c_config_t i2c_config = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = sda,
         .sda_pullup_en = GPIO_PULLUP_ENABLE,
         .scl_io_num = scl,
-        .scl_pullup_en = GPIO_PULLUP_ENABLE,
-        .master.clk_speed = 1000000,
-    };
+        .scl_pullup_en = GPIO_PULLUP_ENABLE};
+    i2c_config.master.clk_speed = 1000000;
+
     i2c_param_config(I2C_NUM_0, &i2c_config);
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
 

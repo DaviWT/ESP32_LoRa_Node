@@ -21,7 +21,7 @@ static const int SPI_Command_Mode = 0;
 static const int SPI_Data_Mode = 1;
 static const int SPI_Frequency = 1000000;
 
-void spi_master_init(SSD1306_t* dev, int16_t GPIO_MOSI, int16_t GPIO_SCLK, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO_RESET)
+void spi_master_init(SSD1306_t* dev, gpio_num_t GPIO_MOSI, gpio_num_t GPIO_SCLK, gpio_num_t GPIO_CS, gpio_num_t GPIO_DC, gpio_num_t GPIO_RESET)
 {
     esp_err_t ret;
 
@@ -43,9 +43,9 @@ void spi_master_init(SSD1306_t* dev, int16_t GPIO_MOSI, int16_t GPIO_SCLK, int16
     }
 
     spi_bus_config_t spi_bus_config = {
-        .sclk_io_num = GPIO_SCLK,
         .mosi_io_num = GPIO_MOSI,
         .miso_io_num = -1,
+        .sclk_io_num = GPIO_SCLK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1};
 
@@ -88,13 +88,13 @@ bool spi_master_write_command(SSD1306_t* dev, uint8_t Command)
 {
     static uint8_t CommandByte = 0;
     CommandByte = Command;
-    gpio_set_level(dev->_dc, SPI_Command_Mode);
+    gpio_set_level((gpio_num_t)dev->_dc, SPI_Command_Mode);
     return spi_master_write_byte(dev->_SPIHandle, &CommandByte, 1);
 }
 
 bool spi_master_write_data(SSD1306_t* dev, const uint8_t* Data, size_t DataLength)
 {
-    gpio_set_level(dev->_dc, SPI_Data_Mode);
+    gpio_set_level((gpio_num_t)dev->_dc, SPI_Data_Mode);
     return spi_master_write_byte(dev->_SPIHandle, Data, DataLength);
 }
 

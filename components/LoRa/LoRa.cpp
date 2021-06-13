@@ -114,6 +114,11 @@ bool LoRa_SendMessageToApplication()
 
 void LORA_Shutdown()
 {
+    gpio_set_level(GPIO_NUM_14, 0);
+    vTaskDelay(pdMS_TO_TICKS(1));
+    gpio_set_level(GPIO_NUM_14, 2);
+    vTaskDelay(pdMS_TO_TICKS(5));
+
     // shutdown
     ttn.shutdown();
 }

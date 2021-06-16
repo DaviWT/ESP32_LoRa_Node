@@ -6,7 +6,6 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_sleep.h"
-#include "lmic.h"
 #include "stdbool.h"
 
 // Tag to indicate at debug log
@@ -36,6 +35,8 @@ static bool LoRa_ModuleSpiBusInit();
 static void LoRa_LmicReset();
 static void messageReceived(const uint8_t *message, size_t length, port_t port);
 static void LoRa_MakePayloadMsg(char *strPayload);
+
+static u1_t initialOpMode = 0xFF;
 
 bool LoRa_NodeInit()
 {
@@ -114,13 +115,28 @@ bool LoRa_SendMessageToApplication()
 
 void LORA_Shutdown()
 {
-    gpio_set_level(GPIO_NUM_14, 0);
-    vTaskDelay(pdMS_TO_TICKS(1));
-    gpio_set_level(GPIO_NUM_14, 2);
-    vTaskDelay(pdMS_TO_TICKS(5));
+    ESP_LOGI(TAG, "OPMODE 1 = 0x%.2X", readOpMode());
 
     // shutdown
     ttn.shutdown();
+
+    hal_pin_rst(2);  // configure RST pin floating!
+    vTaskDelay(pdMS_TO_TICKS(1));
+    hal_pin_rst(0);  // drive RST pin low
+    vTaskDelay(pdMS_TO_TICKS(1));
+    hal_pin_rst(2);  // configure RST pin floating!
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    ESP_LOGI(TAG, "OPMODE 2 = 0x%.2X", readOpMode());
+
+    if(radio_reinit() == 0)
+    {
+        ESP_LOGE(TAG, "ERROR SETTING RADIO TO STANDARD OPERATION!");
+    }
+
+    ESP_LOGI(TAG, "OPMODE 3 = 0x%.2X", readOpMode());
+
+    vTaskDelay(pdMS_TO_TICKS(100));
 }
 
 static bool LoRa_ModuleSpiBusInit()
@@ -208,4 +224,9 @@ static void LoRa_MakePayloadMsg(char *strPayload)
             ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
             break;
     }
+}
+
+void LoRa_SetInitialOpModeVariable(u1_t initOp)
+{
+    initialOpMode = initOp;
 }

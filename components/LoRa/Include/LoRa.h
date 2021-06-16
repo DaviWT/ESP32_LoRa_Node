@@ -4,6 +4,7 @@
 #include "TheThingsNetwork.h"
 #include "esp_event.h"
 #include "freertos/FreeRTOS.h"
+#include "lmic.h"
 #include "stdint.h"
 
 #define CHANNEL_NUM 1
@@ -33,5 +34,6 @@ void LoRa_SetMessageRxCallback();
 bool LoRa_SendPacket(uint8_t txData, size_t dataSize);
 bool LoRa_SendMessageToApplication();
 void LORA_Shutdown();
+void LoRa_SetInitialOpModeVariable(u1_t initOp);
 
 #endif /* MAIN_LORA_H_ */

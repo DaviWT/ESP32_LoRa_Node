@@ -9,6 +9,9 @@
 #include "esp_sleep.h"
 #include "stdbool.h"
 
+// Tag to indicate at debug log
+static const char *TAG = "SLEEP";
+
 static void SetWakeUpConfig(uint64_t microsecondsToWakeUp);
 
 /**
@@ -28,6 +31,8 @@ void Sleep_EnterSleepMode(uint64_t microsecondsToWakeUp)
     SetWakeUpConfig(microsecondsToWakeUp);
 
     // Start deep sleep
+    ESP_LOGW(TAG, "ENTERING DEEP SLEEP...");
+    vTaskDelay(pdMS_TO_TICKS(100));
     esp_deep_sleep_start();
 }
 

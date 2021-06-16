@@ -78,6 +78,9 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "SENDING PACKET AND SLEEPING...");
     vTaskDelay(pdMS_TO_TICKS(50));
 
+    // SAVE INITIAL OPMODE REGISTER FOR LATER (SLEEP)
+    LoRa_SetInitialOpModeVariable(readOpMode());
+
     // SEND MESSAGE TO TTN
     LoRa_SendMessageToApplication();
 

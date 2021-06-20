@@ -56,15 +56,19 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "INITIALIZING SYSTEM MODULES...");
 
     // Init GPIO
+    ESP_LOGI(TAG, "GPIO Init...");
     GPIO_Init();  // @TODO Continuar implementando conforme o desenvolvimento
 
     // Config ADC module
+    ESP_LOGI(TAG, "ADC Init...");
     ADC_ConfigAdc();
 
     // Init OLED display
+    ESP_LOGI(TAG, "Initializing OLED diplay at I2C INTERFACE...");
     OLED_Init(OLED_SDA_PIN, OLED_SCL_PIN, OLED_RST_PIN);
 
     // Initialize the NVS (non-volatile storage) for saving and restoring the keys
+    ESP_LOGI(TAG, "NVS Init...");
     ESP_ERROR_CHECK(nvs_flash_init());
 
     if(!LoRa_NodeInit())
@@ -80,9 +84,6 @@ extern "C" void app_main(void)
 
     ESP_LOGI(TAG, "SENDING PACKET AND SLEEPING...");
     vTaskDelay(pdMS_TO_TICKS(50));
-
-    // SAVE INITIAL OPMODE REGISTER FOR LATER (SLEEP)
-    LoRa_SetInitialOpModeVariable(readOpMode());
 
     // SEND MESSAGE TO TTN
     LoRa_SendMessageToApplication();

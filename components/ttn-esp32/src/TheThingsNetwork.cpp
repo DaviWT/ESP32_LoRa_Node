@@ -10,6 +10,8 @@
  * High-level API for ttn-esp32.
  *******************************************************************************/
 
+#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+
 #include "TheThingsNetwork.h"
 
 #include "TTNLogging.h"
@@ -327,9 +329,7 @@ int TheThingsNetwork::rssi()
 
 // --- Callbacks ---
 
-#if CONFIG_LOG_DEFAULT_LEVEL >= 3 || LMIC_ENABLE_event_logging
 const char *eventNames[] = {LMIC_EVENT_NAME_TABLE__INIT};
-#endif
 
 // Called by LMIC when an LMIC event (join, join failed, reset etc.) occurs
 void eventCallback(void *userData, ev_t event)

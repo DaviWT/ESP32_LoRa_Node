@@ -1,4 +1,4 @@
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#define LOG_LOCAL_LEVEL ESP_LOG_INFO
 
 #include "LoRa.h"
 
@@ -29,7 +29,6 @@ static const u4_t DEVADDR = 0x2603168E;
 static TheThingsNetwork ttn;
 
 const unsigned TX_INTERVAL = 5;
-static uint8_t msgData[] = "Davi, Hello World!";
 
 static bool LoRa_ModuleSpiBusInit();
 static void LoRa_LmicReset();
@@ -109,13 +108,13 @@ bool LoRa_SendMessageToApplication()
         return false;
     }
 
-    ESP_LOGI(TAG, "Message sent!");
+    ESP_LOGI(TAG, "SENT: %s", packetStr);
     return true;
 }
 
 void LORA_Shutdown()
 {
-    ESP_LOGI(TAG, "OPMODE 1 = 0x%.2X", readOpMode());
+    ESP_LOGD(TAG, "OPMODE 1 = 0x%.2X", readOpMode());
 
     // shutdown
     ttn.shutdown();
@@ -127,14 +126,14 @@ void LORA_Shutdown()
     hal_pin_rst(2);  // configure RST pin floating!
     vTaskDelay(pdMS_TO_TICKS(10));
 
-    ESP_LOGI(TAG, "OPMODE 2 = 0x%.2X", readOpMode());
+    ESP_LOGD(TAG, "OPMODE 2 = 0x%.2X", readOpMode());
 
     if(radio_reinit() == 0)
     {
         ESP_LOGE(TAG, "ERROR SETTING RADIO TO STANDARD OPERATION!");
     }
 
-    ESP_LOGI(TAG, "OPMODE 3 = 0x%.2X", readOpMode());
+    ESP_LOGD(TAG, "OPMODE 3 = 0x%.2X", readOpMode());
 
     vTaskDelay(pdMS_TO_TICKS(100));
 }
@@ -206,6 +205,7 @@ static void LoRa_MakePayloadMsg(char *strPayload)
     esp_reset_reason_t resetReason = esp_reset_reason();
     if(resetReason != ESP_RST_DEEPSLEEP)
     {
+        ESP_LOGI(TAG, "Normal boot. Keep-alive message.");
         sprintf(strPayload, "%d|%u|", MSG_TYPE_KEEP_ALIVE, vBat);
         return;
     }
@@ -215,9 +215,11 @@ static void LoRa_MakePayloadMsg(char *strPayload)
     switch(wakeUpReason)
     {
         case ESP_SLEEP_WAKEUP_TIMER:
+            ESP_LOGI(TAG, "Timer wakeup. Keep-alive message.");
             sprintf(strPayload, "%d|%u|", MSG_TYPE_KEEP_ALIVE, vBat);
             break;
         case ESP_SLEEP_WAKEUP_EXT0:
+            ESP_LOGI(TAG, "Ext GPIO wakeup. Alarm message.");
             sprintf(strPayload, "%d|%u|", MSG_TYPE_INFORM_PIN, vBat);
             break;
         default:

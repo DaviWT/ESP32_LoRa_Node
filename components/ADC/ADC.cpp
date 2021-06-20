@@ -20,21 +20,21 @@ static void check_efuse()
     //Check TP is burned into eFuse
     if(esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_TP) == ESP_OK)
     {
-        ESP_LOGI(TAG, "eFuse Two Point: Supported");
+        ESP_LOGD(TAG, "eFuse Two Point: Supported");
     }
     else
     {
-        ESP_LOGI(TAG, "eFuse Two Point: NOT supported");
+        ESP_LOGD(TAG, "eFuse Two Point: NOT supported");
     }
 
     //Check Vref is burned into eFuse
     if(esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF) == ESP_OK)
     {
-        ESP_LOGI(TAG, "eFuse Vref: Supported");
+        ESP_LOGD(TAG, "eFuse Vref: Supported");
     }
     else
     {
-        ESP_LOGI(TAG, "eFuse Vref: NOT supported");
+        ESP_LOGD(TAG, "eFuse Vref: NOT supported");
     }
 }
 
@@ -42,15 +42,15 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
 {
     if(val_type == ESP_ADC_CAL_VAL_EFUSE_TP)
     {
-        ESP_LOGI(TAG, "Characterized using Two Point Value");
+        ESP_LOGD(TAG, "Characterized using Two Point Value");
     }
     else if(val_type == ESP_ADC_CAL_VAL_EFUSE_VREF)
     {
-        ESP_LOGI(TAG, "Characterized using eFuse Vref");
+        ESP_LOGD(TAG, "Characterized using eFuse Vref");
     }
     else
     {
-        ESP_LOGI(TAG, "Characterized using Default Vref");
+        ESP_LOGD(TAG, "Characterized using Default Vref");
     }
 }
 
@@ -98,6 +98,6 @@ uint32_t ADC_GetVoltage()
 
     //Convert adc_reading to voltage in mV
     uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
-    ESP_LOGI(TAG, "Raw: %d\t\tVoltage: %dmV", adc_reading, voltage);
+    ESP_LOGI(TAG, "Raw: %d | Voltage: %dmV", adc_reading, voltage);
     return voltage;
 }

@@ -12,7 +12,6 @@ bool displayInitialized = false;
 
 extern "C" void OLED_Init(gpio_num_t sdaPin, gpio_num_t sclPin, gpio_num_t rstPin)
 {
-    ESP_LOGI(TAG, "Initializing OLED diplay at I2C INTERFACE");
     i2c_master_init(&dev, sdaPin, sclPin, rstPin);
 
     displayInitialized = true;

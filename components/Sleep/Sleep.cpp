@@ -48,6 +48,7 @@ void Sleep_SetFlagToStartSleepRoutine()
 {
     ESP_LOGI(TAG, "Setting sleep flag to start sleep routine");
     u8SwRstFlagIsToDeepSleepNow = 1;
+    vTaskDelay(pdMS_TO_TICKS(50));
     esp_restart();
 }
 

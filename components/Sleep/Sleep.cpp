@@ -9,10 +9,47 @@
 #include "esp_sleep.h"
 #include "stdbool.h"
 
+RTC_NOINIT_ATTR uint8_t u8SwRstFlagIsToDeepSleepNow;
+
 // Tag to indicate at debug log
 static const char *TAG = "SLEEP";
 
 static void SetWakeUpConfig(uint64_t microsecondsToWakeUp);
+
+/**
+ * @brief Check if it's to sleep after a software reset was done
+ * 
+ * @note This is being done because of radio lora isn't sleep 100% on the previous execution
+ * 
+ */
+void Sleep_IsToDeepSleepAfterReset()
+{
+    if(u8SwRstFlagIsToDeepSleepNow == 1)
+    {
+        u8SwRstFlagIsToDeepSleepNow = 0;
+        ESP_LOGI(TAG, "Sleep flag is set. Entering sleep mode");
+        Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
+
+        // NOT SUPPOSED TO REACH HERE
+        ESP_LOGE(TAG, "INSOMNIA! SHOULD'VE SLEPT!");
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    else
+    {
+        u8SwRstFlagIsToDeepSleepNow = 0;
+    }
+}
+
+/**
+ * @brief Set flag to start sleep routine
+ * 
+ */
+void Sleep_SetFlagToStartSleepRoutine()
+{
+    ESP_LOGI(TAG, "Setting sleep flag to start sleep routine");
+    u8SwRstFlagIsToDeepSleepNow = 1;
+    esp_restart();
+}
 
 /**
  * @brief Enter in deep sleep state

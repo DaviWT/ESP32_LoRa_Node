@@ -75,6 +75,9 @@ extern "C" void app_main(void)
 
     /********************************************************************************/
 
+    // Check if sleep routine started in previous executions
+    Sleep_IsToDeepSleepAfterReset();
+
     ESP_LOGI(TAG, "SENDING PACKET AND SLEEPING...");
     vTaskDelay(pdMS_TO_TICKS(50));
 
@@ -84,9 +87,6 @@ extern "C" void app_main(void)
     // SEND MESSAGE TO TTN
     LoRa_SendMessageToApplication();
 
-    Sleep_EnterSleepMode(KEEP_ALIVE_TIMEOUT_uS);
-
-    // NOT SUPPOSED TO REACH HERE
-    ESP_LOGE(TAG, "INSOMNIA! SHOULD'VE SLEPT!");
-    vTaskDelay(pdMS_TO_TICKS(500));
+    // Set sleep routine
+    Sleep_SetFlagToStartSleepRoutine();
 }

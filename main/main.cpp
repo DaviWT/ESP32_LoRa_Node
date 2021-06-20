@@ -28,7 +28,7 @@
 #include "freertos/FreeRTOS.h"
 #include "nvs_flash.h"
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";

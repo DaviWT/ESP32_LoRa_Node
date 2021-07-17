@@ -34,6 +34,7 @@ static bool LoRa_ModuleSpiBusInit();
 static void LoRa_LmicReset();
 static void messageReceived(const uint8_t *message, size_t length, port_t port);
 static void LoRa_MakePayloadMsg(char *strPayload);
+static void LoRa_SetTxConfig(tx_config_e mode);
 
 static u1_t initialOpMode = 0xFF;
 
@@ -173,11 +174,8 @@ static void LoRa_LmicReset()
     // Disable link check validation
     LMIC_setLinkCheckMode(0);
 
-    // TTN uses SF9 for its RX2 window.
-    LMIC.dn2Dr = DR_SF9;
-
-    // Set data rate and transmit power for uplink
-    LMIC_setDrTxpow(DR_SF9, 14);
+    // Configures LoRa TX Mode
+    LoRa_SetTxConfig(TX_MODE_1);
 
     vTaskDelay(pdMS_TO_TICKS(100));
 }
@@ -231,4 +229,39 @@ static void LoRa_MakePayloadMsg(char *strPayload)
 void LoRa_SetInitialOpModeVariable(u1_t initOp)
 {
     initialOpMode = initOp;
+}
+
+static void LoRa_SetTxConfig(tx_config_e mode)
+{
+    switch(mode)
+    {
+        //NOTE: All bandwidths are set to 125kHz since only channel 9 is activated
+        case TX_MODE_1:
+            // TTN uses SF9 for its RX2 window.
+            LMIC.dn2Dr = DR_SF10;
+            // Set data rate and transmit power for uplink
+            LMIC_setDrTxpow(DR_SF10, 14);
+            break;
+        case TX_MODE_2:
+            // TTN uses SF9 for its RX2 window.
+            LMIC.dn2Dr = DR_SF7;
+            // Set data rate and transmit power for uplink
+            LMIC_setDrTxpow(DR_SF7, 14);
+            break;
+        case TX_MODE_3:
+            // TTN uses SF9 for its RX2 window.
+            LMIC.dn2Dr = DR_SF10;
+            // Set data rate and transmit power for uplink
+            LMIC_setDrTxpow(DR_SF10, 7);
+            break;
+        case TX_MODE_4:
+            // TTN uses SF9 for its RX2 window.
+            LMIC.dn2Dr = DR_SF7;
+            // Set data rate and transmit power for uplink
+            LMIC_setDrTxpow(DR_SF7, 7);
+            break;
+        default:
+            ESP_LOGE(TAG, "Unknown LoRa TX mode!");
+            break;
+    }
 }

@@ -26,6 +26,14 @@
 #define MSG_TYPE_KEEP_ALIVE   0
 #define MSG_TYPE_INFORM_PIN   1
 
+typedef enum
+{
+    TX_MODE_1 = 0,  //SF10 | 125kHz | 14dBm (datarate 2)
+    TX_MODE_2,      //SF7 | 125kHz | 14dBm (datarate 5)
+    TX_MODE_3,      //SF10 | 125kHz | 7dBm (datarate 2)
+    TX_MODE_4       //SF7 | 125kHz | 7dBm (datarate 5)
+} tx_config_e;
+
 bool LoRa_NodeInit();
 bool LoRa_ModemPinoutInit();
 void LoRa_SelectChannel(uint8_t channel_number);

@@ -177,7 +177,7 @@ static void LoRa_LmicReset()
     LMIC_setLinkCheckMode(0);
 
     // Configures LoRa TX Mode
-    LoRa_SetTxConfig(TX_MODE_2);
+    LoRa_SetTxConfig(TX_MODE_3);
 
     vTaskDelay(pdMS_TO_TICKS(100));
 }

@@ -30,15 +30,30 @@
 
 #define DEBUG_MODE 0
 
+#define BOOT_BUTTON GPIO_NUM_0
+
 // Tag to indicate at debug log
 static const char *TAG = "MAIN";
 
 static void GPIO_Init()
 {
+    gpio_set_direction(BOOT_BUTTON, GPIO_MODE_INPUT);
     gpio_set_direction(GPIO_NUM_25, GPIO_MODE_OUTPUT);
 
     // Initialize the GPIO ISR handler service
     ESP_ERROR_CHECK(gpio_install_isr_service(ESP_INTR_FLAG_IRAM));
+}
+
+static void blinkLed_TEST()
+{
+    gpio_set_level(GPIO_NUM_25, 0);
+    int i;
+    for(i = 0; i < 10; i++)
+    {
+        gpio_set_level(GPIO_NUM_25, i % 2);
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    gpio_set_level(GPIO_NUM_25, 0);
 }
 
 extern "C" void app_main(void)
@@ -79,15 +94,26 @@ extern "C" void app_main(void)
 
     /********************************************************************************/
 
-    // Check if sleep routine started in previous executions
-    Sleep_IsToDeepSleepAfterReset();
+    // WAIT FOR BOTAO BOTAO
+    ESP_LOGW(TAG, "Waiting for button...");
+    while(gpio_get_level(BOOT_BUTTON) == 1)
+        vTaskDelay(pdMS_TO_TICKS(200));
+    ESP_LOGW(TAG, "Button pressed!");
 
-    ESP_LOGI(TAG, "SENDING PACKET AND SLEEPING...");
-    vTaskDelay(pdMS_TO_TICKS(50));
+    // // Check if sleep routine started in previous executions
+    // Sleep_IsToDeepSleepAfterReset();
 
-    // SEND MESSAGE TO TTN
-    LoRa_SendMessageToApplication();
+    // ESP_LOGI(TAG, "SENDING PACKET AND SLEEPING...");
+    // vTaskDelay(pdMS_TO_TICKS(50));
 
-    // Set sleep routine
-    Sleep_SetFlagToStartSleepRoutine();
+    for(int i = 0; i < 100; i++)
+    {
+        // SEND MESSAGE TO TTN
+        LoRa_SendMessageToApplication();
+    }
+
+    blinkLed_TEST();
+
+    // // Set sleep routine
+    // Sleep_SetFlagToStartSleepRoutine();
 }

@@ -34,6 +34,7 @@ static bool LoRa_ModuleSpiBusInit();
 static void LoRa_LmicReset();
 static void messageReceived(const uint8_t *message, size_t length, port_t port);
 static void LoRa_MakePayloadMsg(char *strPayload);
+static void LoRa_MakeTestPacket(char *strPayload);
 static void LoRa_SetTxConfig(tx_config_e mode);
 
 static u1_t initialOpMode = 0xFF;
@@ -101,7 +102,8 @@ bool LoRa_SendPacket(uint8_t *txData, size_t dataSize)
 bool LoRa_SendMessageToApplication()
 {
     char packetStr[100] = "";
-    LoRa_MakePayloadMsg(packetStr);
+    // LoRa_MakePayloadMsg(packetStr);
+    LoRa_MakeTestPacket(packetStr);
 
     if(!LoRa_SendPacket((uint8_t *)packetStr, strlen(packetStr)))
     {
@@ -224,6 +226,11 @@ static void LoRa_MakePayloadMsg(char *strPayload)
             ESP_LOGE(TAG, "Failed to set payload message because of unexpected wake-up reason");
             break;
     }
+}
+
+static void LoRa_MakeTestPacket(char *strPayload)
+{
+    strcpy(strPayload, "CONSELHODOSMAGOS");
 }
 
 void LoRa_SetInitialOpModeVariable(u1_t initOp)
